@@ -10,7 +10,9 @@ import tensorflow as tf
 from glob import glob
 from urllib.request import urlretrieve
 from tqdm import tqdm
-
+from scipy import ndimage
+from moviepy.editor import VideoFileClip
+from IPython.display import HTML
 
 class DLProgress(tqdm):
     last_block = 0
@@ -93,7 +95,12 @@ def gen_batch_function(data_folder, image_shape):
 
                 images.append(image)
                 gt_images.append(gt_image)
-
+                
+                #Apply Non-local filters to enhance contrast of image for data augmentation
+                filter = ndimage.white_tophat(image,size=[160,576,3])
+                images.append(filter)
+                gt_images.append(gt_image)
+                
             yield np.array(images), np.array(gt_images)
     return get_batches_fn
 
