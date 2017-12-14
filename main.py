@@ -62,31 +62,31 @@ def layers(vgg_layer3_out, vgg_layer4_out, vgg_layer7_out, num_classes):
     #Then upsample
     #add skip layers etc
     layer7_out = tf.layers.conv2d(vgg_layer7_out, num_classes, 1, 1, padding='same', 
-                               kernel_regularizer=tf.contrib.layers.l2_regularizer(5e-4),
+                               kernel_regularizer=tf.contrib.layers.l2_regularizer(5e-3),
                                kernel_initializer=tf.truncated_normal_initializer(stddev=0.01))
     
     layer4_in = tf.layers.conv2d_transpose(layer7_out, num_classes, 4, 2, padding='same',
-                                       kernel_regularizer=tf.contrib.layers.l2_regularizer(1e-4),
+                                       kernel_regularizer=tf.contrib.layers.l2_regularizer(1e-3),
                                        kernel_initializer=tf.truncated_normal_initializer(stddev=0.01))
     
     conv4 =  tf.layers.conv2d(vgg_layer4_out, num_classes, 1, strides=(1,1), padding='same',
-                                      kernel_regularizer=tf.contrib.layers.l2_regularizer(1e-4),
+                                      kernel_regularizer=tf.contrib.layers.l2_regularizer(1e-3),
                                       kernel_initializer=tf.truncated_normal_initializer(stddev=0.01))
     
     layer4_out = tf.add(layer4_in, conv4)
     
     layer3_in = tf.layers.conv2d_transpose(layer4_out, num_classes, 4, 2, padding='same', 
-                                        kernel_regularizer=tf.contrib.layers.l2_regularizer(1e-4),
+                                        kernel_regularizer=tf.contrib.layers.l2_regularizer(1e-3),
                                         kernel_initializer=tf.truncated_normal_initializer(stddev=0.01))
     
     conv3 = tf.layers.conv2d(vgg_layer3_out, num_classes, 1, strides=(1, 1), padding='same',
                                       kernel_initializer=tf.random_normal_initializer(stddev=0.01),
-                                      kernel_regularizer=tf.contrib.layers.l2_regularizer(1e-4))
+                                      kernel_regularizer=tf.contrib.layers.l2_regularizer(1e-3))
     
     layer3_out = tf.add(layer3_in, conv3)
     
     nn_last_layer = tf.layers.conv2d_transpose(layer3_out, num_classes, 16, 8, padding='same',
-                                       kernel_regularizer=tf.contrib.layers.l2_regularizer(1e-4),
+                                       kernel_regularizer=tf.contrib.layers.l2_regularizer(1e-3),
                                        kernel_initializer=tf.truncated_normal_initializer(stddev=0.01))
     return nn_last_layer
 tests.test_layers(layers)
@@ -159,8 +159,8 @@ def run():
     # You'll need a GPU with at least 10 teraFLOPS to train on.
     #  https://www.cityscapes-dataset.com/
     
-    epochs = 4
-    batch_size = 7 #in actuality, batch size is double this value due to image augmentation
+    epochs = 6
+    batch_size = 6 #in actuality, batch size is double this value due to image augmentation
     learning_rate = 1e-3
 
     with tf.Session() as sess:
@@ -171,7 +171,7 @@ def run():
 
         # OPTIONAL: Augment Images for better results
         #  https://datascience.stackexchange.com/questions/5224/how-to-prepare-augment-images-for-neural-network
-        batch_size = 14 #batch size doubles in get_batches_fn due to data augmentation
+        batch_size = 12 #batch size doubles in get_batches_fn due to data augmentation
         
         #Placeholder Variables
         correct_label = tf.placeholder(tf.float32, shape=[batch_size, image_shape[0], image_shape[1], 2])
@@ -182,7 +182,7 @@ def run():
         nn_output= layers(layer3_out, layer4_out, layer7_out, num_classes)
         logits, train_op, cross_entropy_loss = optimize(nn_output, correct_label, learning_rate, num_classes)
         
-        batch_size = 7
+        batch_size = 6
         # TODO: Train NN using the train_nn function
         train_nn(sess, epochs, batch_size, get_batches_fn, train_op, cross_entropy_loss, input_image, correct_label, keep_prob, learning_rate)
         
